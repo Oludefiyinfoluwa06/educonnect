@@ -1,11 +1,11 @@
 import { View, Text } from 'react-native';
 
-const NotFound = () => {
+const TabLayout = () => {
   return (
     <View>
-      <Text>NotFound</Text>
+      <Text>TabLayout</Text>
     </View>
   );
 }
 
-export default NotFound;
+export default TabLayout;
