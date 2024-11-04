@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Link, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
+import axios from 'axios';
+import { config } from '../../config';
 
 const SignUp = () => {
+    const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const [isParent, setIsParent] = useState(true);
     const [formData, setFormData] = useState({
         fullName: '',
@@ -13,6 +18,7 @@ const SignUp = () => {
         phone: '',
         password: '',
         childName: '',
+        studentId: '',
         role: 'Parent',
     });
     const router = useRouter();
@@ -25,8 +31,20 @@ const SignUp = () => {
     };
 
     const handleSignUp = async () => {
-        console.log('Form Data:', formData);
-        router.push(isParent ? "../parent/(tabs)/dashboard" : "../admin/(tabs)/dashboard");
+        setLoading(true);
+
+        try {
+            const response = await axios.post(`${config.BASE_API_URL}/api/auth/register`, formData);
+            await AsyncStorage.setItem('token', response.data.token);
+            await AsyncStorage.setItem('role', response.data.user.role);
+            router.replace(isParent ? "../parent/(tabs)/dashboard" : "../admin/(tabs)/dashboard");
+        } catch (error: any) {
+            setErrorMessage(error.response.data.message);
+
+            setTimeout(() => setErrorMessage(''), 3000);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -85,6 +103,12 @@ const SignUp = () => {
                             }`}>Admin</Text>
                         </TouchableOpacity>
                     </View>
+
+                    {errorMessage && (
+                        <View className="bg-red-100 rounded-md px-4 py-3 my-2">
+                            <Text className="text-red-600 font-medium text-sm">{errorMessage}</Text>
+                        </View>
+                    )}
 
                     <View className="space-y-4">
                         <View>
@@ -152,7 +176,7 @@ const SignUp = () => {
                         className="bg-blue-600 h-12 rounded-xl items-center justify-center mt-6"
                         onPress={handleSignUp}
                     >
-                        <Text className="text-white font-rsemibold">Create Account</Text>
+                        <Text className="text-white font-rsemibold">{loading ? 'Loading...' : 'Create Account'}</Text>
                     </TouchableOpacity>
 
                     <View className="flex-row justify-center mt-4">

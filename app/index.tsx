@@ -3,11 +3,23 @@ import { router } from 'expo-router';
 import { View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SplashScreen = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
-            router.push("/sign-in");
+            const checkIsLoggedIn = async () => {
+                const token = await AsyncStorage.getItem('token');
+                const role = await AsyncStorage.getItem('role');
+
+                if (!token || !role) {
+                    router.replace("/sign-in");
+                } else {
+                    router.replace(role === "Parent" ? "../parent/(tabs)/dashboard" : "../admin/(tabs)/dashboard");
+                }
+            }
+
+            checkIsLoggedIn();
         }, 3000);
 
         return () => clearTimeout(timer);

@@ -1,14 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Link, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
+import axios from 'axios';
+import { config } from '../../config';
 
 const SignIn = () => {
+    const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
+    });
     const router = useRouter();
 
+    const handleInputChange = (field: any, value: any) => {
+        setFormData((prev: any) => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
     const handleSignIn = async () => {
-        router.push("../admin/dashboard");
+        setLoading(true);
+
+        try {
+            const response = await axios.post(`${config.BASE_API_URL}/api/auth/login`, formData);
+            await AsyncStorage.setItem('token', response.data.token);
+            await AsyncStorage.setItem('role', response.data.user.role);
+            router.replace(response.data.user.role === "Parent" ? "../parent/(tabs)/dashboard" : "../admin/(tabs)/dashboard");
+        } catch (error: any) {
+            setErrorMessage(error.response.data.message);
+
+            setTimeout(() => setErrorMessage(''), 3000);
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -38,6 +67,12 @@ const SignIn = () => {
                     <Text className="text-2xl font-rbold text-gray-800 mt-4">Welcome Back!</Text>
                 </View>
 
+                {errorMessage && (
+                    <View className="bg-red-100 rounded-md px-4 py-3 my-2">
+                        <Text className="text-red-600 font-medium text-sm">{errorMessage}</Text>
+                    </View>
+                )}
+
                 <View className="space-y-4">
                     <View>
                         <Text className="text-gray-700 mb-2 text-sm font-rregular">Email Address</Text>
@@ -46,6 +81,8 @@ const SignIn = () => {
                             className="w-full h-12 px-4 border border-gray-200 rounded-xl bg-gray-50 font-rregular"
                             keyboardType="email-address"
                             autoCapitalize="none"
+                            value={formData.email}
+                            onChangeText={(text) => handleInputChange('email', text)}
                         />
                     </View>
 
@@ -55,6 +92,8 @@ const SignIn = () => {
                             placeholder="Enter your password"
                             className="w-full h-12 px-4 border border-gray-200 rounded-xl bg-gray-50 font-rregular"
                             secureTextEntry
+                            value={formData.password}
+                            onChangeText={(text) => handleInputChange('password', text)}
                         />
                     </View>
                 </View>
@@ -63,7 +102,7 @@ const SignIn = () => {
                     className="bg-blue-600 h-12 rounded-xl items-center justify-center mt-6"
                     onPress={handleSignIn}
                 >
-                    <Text className="text-white font-rsemibold">Sign In</Text>
+                    <Text className="text-white font-rsemibold">{loading ? 'Loading...' : 'Sign In'}</Text>
                 </TouchableOpacity>
 
                 <View className="flex-row justify-center mt-8">
