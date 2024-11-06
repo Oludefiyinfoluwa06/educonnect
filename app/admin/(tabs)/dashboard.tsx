@@ -82,12 +82,6 @@ const Dashboard = () => {
                         icon={"cash-outline" as keyof typeof Ionicons.glyphMap}
                         color="bg-green-100"
                     />
-                    <StatCard
-                        title="Messages"
-                        value="28"
-                        icon={"chatbubbles-outline" as keyof typeof Ionicons.glyphMap}
-                        color="bg-yellow-100"
-                    />
                 </ScrollView>
 
                 <View className="flex-row justify-between mt-6">
@@ -110,12 +104,6 @@ const Dashboard = () => {
                 <View className="mt-6 mb-6">
                     <Text className="text-lg font-rbold text-gray-800 mb-3">Recent Activity</Text>
                     <View className="bg-white rounded-xl shadow-sm p-4">
-                        <ActivityItem
-                            title="New Message"
-                            description="Parent inquiry about fees"
-                            time="2m ago"
-                            type="message"
-                        />
                         <ActivityItem
                             title="Fee Payment"
                             description="₦150,000 received from John Doe"
