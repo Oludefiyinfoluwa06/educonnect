@@ -49,13 +49,19 @@ const Dashboard = () => {
                 </View>
 
                 <View className="flex-row justify-between mt-4">
-                    <TouchableOpacity className="bg-white p-4 rounded-xl shadow-sm flex-1 mr-2 items-center">
+                    <TouchableOpacity
+                        className="bg-white p-4 rounded-xl shadow-sm flex-1 mr-2 items-center"
+                        onPress={() => router.push("./payments")}
+                    >
                         <View className="w-12 h-12 bg-blue-100 rounded-full items-center justify-center mb-2">
                             <Ionicons name="wallet-outline" size={24} color="#2563eb" />
                         </View>
                         <Text className="text-gray-800 font-rmedium">Pay Fees</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity className="bg-white p-4 rounded-xl shadow-sm flex-1 ml-2 items-center">
+                    <TouchableOpacity
+                        className="bg-white p-4 rounded-xl shadow-sm flex-1 ml-2 items-center"
+                        onPress={() => router.push("../(screens)/messages")}
+                    >
                         <View className="w-12 h-12 bg-blue-100 rounded-full items-center justify-center mb-2">
                             <Ionicons name="chatbubbles-outline" size={24} color="#2563eb" />
                         </View>
