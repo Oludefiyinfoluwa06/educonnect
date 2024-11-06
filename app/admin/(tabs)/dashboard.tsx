@@ -61,7 +61,10 @@ const Dashboard = () => {
                         <Text className="text-gray-600">Welcome back,</Text>
                         <Text className="text-xl font-bold text-gray-800">Admin</Text>
                     </View>
-                    <TouchableOpacity className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center">
+                    <TouchableOpacity
+                        className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center"
+                        onPress={() => router.push("../(screens)/profile")}
+                    >
                         <Ionicons name="person-outline" size={20} color="#2563eb" />
                     </TouchableOpacity>
                 </View>
