@@ -1,10 +1,11 @@
 import { View, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const NotFound = () => {
   return (
-    <View>
+    <SafeAreaView>
       <Text>NotFound</Text>
-    </View>
+    </SafeAreaView>
   );
 }
 

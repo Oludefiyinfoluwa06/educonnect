@@ -35,6 +35,10 @@ const RootLayout = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name='+not-found'
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name='(auth)'
         options={{ headerShown: false }}
       />
