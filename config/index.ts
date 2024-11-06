@@ -1,3 +1,3 @@
 export const config = {
-    BASE_API_URL: 'http://192.168.32.68:5000',
+    BASE_API_URL: 'http://192.168.52.68:5000',
 };

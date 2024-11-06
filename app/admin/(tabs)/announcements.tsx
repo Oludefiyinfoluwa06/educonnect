@@ -21,15 +21,15 @@ const AnnouncementCard: React.FC<Announcement> = ({ title, content, date, priori
     return (
         <View className="bg-white p-4 rounded-xl shadow-sm mb-3">
             <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-gray-800 font-semibold text-lg">{title}</Text>
+                <Text className="text-gray-800 font-rsemibold text-lg">{title}</Text>
                 <View className={`px-3 py-1 rounded-full ${priorityColors[priority].split(' ')[0]}`}>
-                    <Text className={`${priorityColors[priority].split(' ')[1]} font-medium capitalize`}>
+                    <Text className={`${priorityColors[priority].split(' ')[1]} font-rmedium capitalize`}>
                         {priority}
                     </Text>
                 </View>
             </View>
-            <Text className="text-gray-600 mb-2">{content}</Text>
-            <Text className="text-gray-500 text-sm">{date}</Text>
+            <Text className="text-gray-600 mb-2 font-rregular">{content}</Text>
+            <Text className="text-gray-500 text-sm font-rregular">{date}</Text>
         </View>
     );
 }
@@ -61,25 +61,25 @@ const Announcements = () => {
         <SafeAreaView className="flex-1 bg-gray-50">
             <ScrollView className="flex-1 px-4">
                 <View className="flex-row justify-between items-center py-4">
-                    <Text className="text-xl font-bold text-gray-800">Announcements</Text>
+                    <Text className="text-xl font-rbold text-gray-800">Announcements</Text>
                     <TouchableOpacity
                         className="bg-blue-600 px-4 py-2 rounded-full"
                         onPress={() => setShowNewForm(!showNewForm)}
                     >
-                        <Text className="text-white font-medium">{showNewForm ? 'Close Announcement Form' : 'New Announcement'}</Text>
+                        <Text className="text-white font-rmedium">{showNewForm ? 'Close Announcement Form' : 'New Announcement'}</Text>
                     </TouchableOpacity>
                 </View>
 
                 {showNewForm && (
                     <View className="bg-white p-4 rounded-xl shadow-sm mb-4">
                         <TextInput
-                            className="border border-gray-200 rounded-lg p-2 mb-3"
+                            className="border border-gray-200 rounded-lg p-2 mb-3 font-rregular"
                             placeholder="Announcement Title"
                             value={title}
                             onChangeText={setTitle}
                         />
                         <TextInput
-                            className="border border-gray-200 rounded-lg p-2 mb-3"
+                            className="border border-gray-200 rounded-lg p-2 mb-3 font-rregular"
                             placeholder="Announcement Content"
                             multiline
                             numberOfLines={4}
@@ -94,14 +94,14 @@ const Announcements = () => {
                                     className={`mr-2 px-4 py-2 rounded-full ${priority === p ? 'bg-blue-600' : 'bg-gray-200'}`}
                                     onPress={() => setPriority(p)}
                                 >
-                                    <Text className={`font-medium capitalize ${priority === p ? 'text-white' : 'text-gray-600'}`}>
+                                    <Text className={`font-rmedium capitalize ${priority === p ? 'text-white' : 'text-gray-600'}`}>
                                         {p}
                                     </Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
                         <TouchableOpacity className="bg-blue-600 p-3 rounded-lg">
-                            <Text className="text-white font-medium text-center">Post Announcement</Text>
+                            <Text className="text-white font-rmedium text-center">Post Announcement</Text>
                         </TouchableOpacity>
                     </View>
                 )}

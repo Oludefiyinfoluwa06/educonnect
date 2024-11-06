@@ -20,15 +20,15 @@ const AnnouncementCard: React.FC<Announcement> = ({ title, content, date, priori
     return (
         <View className="bg-white p-4 rounded-xl shadow-sm mb-3">
             <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-gray-800 font-semibold text-lg">{title}</Text>
+                <Text className="text-gray-800 font-rsemibold text-lg">{title}</Text>
                 <View className={`px-3 py-1 rounded-full ${priorityColors[priority].split(' ')[0]}`}>
-                    <Text className={`${priorityColors[priority].split(' ')[1]} font-medium capitalize`}>
+                    <Text className={`${priorityColors[priority].split(' ')[1]} font-rmedium capitalize`}>
                         {priority}
                     </Text>
                 </View>
             </View>
-            <Text className="text-gray-600 mb-2">{content}</Text>
-            <Text className="text-gray-500 text-sm">{date}</Text>
+            <Text className="text-gray-600 mb-2 font-rregular">{content}</Text>
+            <Text className="text-gray-500 text-sm font-rregular">{date}</Text>
         </View>
     );
 }
@@ -62,19 +62,8 @@ const Announcements = () => {
         <SafeAreaView className="flex-1 bg-gray-50">
             <ScrollView className="flex-1 px-4">
                 <View className="py-4">
-                    <Text className="text-xl font-bold text-gray-800">Announcements</Text>
-                    <Text className="text-gray-600">Stay updated with school news</Text>
-                </View>
-
-                <View className="flex-row justify-between mb-4">
-                    <View className="bg-blue-100 p-3 rounded-xl flex-1 mr-2">
-                        <Text className="text-blue-600 font-medium">New</Text>
-                        <Text className="text-2xl font-bold text-gray-800">2</Text>
-                    </View>
-                    <View className="bg-red-100 p-3 rounded-xl flex-1 ml-2">
-                        <Text className="text-red-600 font-medium">Important</Text>
-                        <Text className="text-2xl font-bold text-gray-800">1</Text>
-                    </View>
+                    <Text className="text-xl font-rbold text-gray-800">Announcements</Text>
+                    <Text className="text-gray-600 font-rregular">Stay updated with school news</Text>
                 </View>
 
                 {announcements.map((announcement) => (

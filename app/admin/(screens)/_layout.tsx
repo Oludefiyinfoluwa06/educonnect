@@ -7,6 +7,10 @@ const AdminScreensLayout = () => {
                 name='profile'
                 options={{ headerShown: false }}
             />
+            <Stack.Screen
+                name='students/[studentId]'
+                options={{ headerShown: false }}
+            />
         </Stack>
     );
 }

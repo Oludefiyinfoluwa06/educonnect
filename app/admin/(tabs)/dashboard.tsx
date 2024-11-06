@@ -18,8 +18,8 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color }) => {
             <View className={`w-10 h-10 ${color} rounded-full items-center justify-center mb-2`}>
                 <Ionicons name={icon} size={20} color="#2563eb" />
             </View>
-            <Text className="text-2xl font-bold text-gray-800">{value}</Text>
-            <Text className="text-gray-600 mt-1">{title}</Text>
+            <Text className="text-2xl font-rbold text-gray-800">{value}</Text>
+            <Text className="text-gray-600 mt-1 font-rregular">{title}</Text>
         </View>
     );
 }
@@ -44,10 +44,10 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ title, description, time, t
                 <Ionicons name={icons[type]} size={20} color="#2563eb" />
             </View>
             <View className="flex-1 ml-3">
-                <Text className="text-gray-800 font-semibold">{title}</Text>
-                <Text className="text-gray-600 text-sm">{description}</Text>
+                <Text className="text-gray-800 font-rsemibold">{title}</Text>
+                <Text className="text-gray-600 text-sm font-rregular">{description}</Text>
             </View>
-            <Text className="text-gray-500 text-sm">{time}</Text>
+            <Text className="text-gray-500 text-sm font-rregular">{time}</Text>
         </View>
     );
 }
@@ -58,8 +58,8 @@ const Dashboard = () => {
             <ScrollView className="flex-1 px-4">
                 <View className="flex-row justify-between items-center py-4">
                     <View>
-                        <Text className="text-gray-600">Welcome back,</Text>
-                        <Text className="text-xl font-bold text-gray-800">Admin</Text>
+                        <Text className="text-gray-600 font-rregular">Welcome back,</Text>
+                        <Text className="text-xl font-rbold text-gray-800">Admin</Text>
                     </View>
                     <TouchableOpacity
                         className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center"
@@ -91,18 +91,24 @@ const Dashboard = () => {
                 </ScrollView>
 
                 <View className="flex-row justify-between mt-6">
-                    <TouchableOpacity className="bg-white p-4 rounded-xl shadow-sm flex-1 mr-2">
+                    <TouchableOpacity
+                        className="bg-white p-4 rounded-xl shadow-sm flex-1 mr-2"
+                        onPress={() => router.push("./students")}
+                    >
                         <Ionicons name="add-circle-outline" size={24} color="#2563eb" />
-                        <Text className="text-gray-800 font-medium mt-2">Add Student</Text>
+                        <Text className="text-gray-800 font-rmedium mt-2">Add Student</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity className="bg-white p-4 rounded-xl shadow-sm flex-1 mx-2">
+                    <TouchableOpacity
+                        className="bg-white p-4 rounded-xl shadow-sm flex-1 mx-2"
+                        onPress={() => router.push("./announcements")}
+                    >
                         <Ionicons name="megaphone-outline" size={24} color="#2563eb" />
-                        <Text className="text-gray-800 font-medium mt-2">Announce</Text>
+                        <Text className="text-gray-800 font-rmedium mt-2">Announce</Text>
                     </TouchableOpacity>
                 </View>
 
                 <View className="mt-6 mb-6">
-                    <Text className="text-lg font-bold text-gray-800 mb-3">Recent Activity</Text>
+                    <Text className="text-lg font-rbold text-gray-800 mb-3">Recent Activity</Text>
                     <View className="bg-white rounded-xl shadow-sm p-4">
                         <ActivityItem
                             title="New Message"
