@@ -1,15 +1,31 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import axios from 'axios';
+import { config } from '@/config';
 
 interface StatCardProps {
     title: string;
     value: string | number;
     icon: keyof typeof Ionicons.glyphMap;
     color: string;
+}
+
+interface DashboardStats {
+    totalStudents: number;
+    newStudents: number;
+    classDistribution: Array<{
+        _id: string;
+        count: number;
+    }>;
+    genderDistribution: Array<{
+        _id: string;
+        count: number;
+    }>;
+    lastUpdated: string;
 }
 
 const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color }) => {
@@ -53,6 +69,37 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ title, description, time, t
 }
 
 const Dashboard = () => {
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchDashboardStats = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get(`${config.BASE_API_URL}api/dashboard/stats`);
+            setStats(response.data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching dashboard stats:', err);
+            setError('Failed to fetch dashboard statistics');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchDashboardStats();
+
+        const interval = setInterval(fetchDashboardStats, 300000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const formatNumber = (num: number) => {
+        if (num >= 1000) {
+            return `${(num / 1000).toFixed(1)}k`;
+        }
+        return num.toString();
+    };
     return (
         <SafeAreaView className="flex-1 bg-gray-50">
             <ScrollView className="flex-1 px-4">
@@ -72,14 +119,14 @@ const Dashboard = () => {
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-4">
                     <StatCard
                         title="Total Students"
-                        value="1,234"
-                        icon={"people-outline" as keyof typeof Ionicons.glyphMap}
+                        value={loading ? '...' : formatNumber(stats?.totalStudents || 0)}
+                        icon="people-outline"
                         color="bg-blue-100"
                     />
                     <StatCard
-                        title="Fees Collected"
-                        value="₦2.5M"
-                        icon={"cash-outline" as keyof typeof Ionicons.glyphMap}
+                        title="New Students"
+                        value={loading ? '...' : formatNumber(stats?.newStudents || 0)}
+                        icon="person-add-outline"
                         color="bg-green-100"
                     />
                 </ScrollView>

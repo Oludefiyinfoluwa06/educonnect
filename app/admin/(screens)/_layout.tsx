@@ -8,7 +8,7 @@ const AdminScreensLayout = () => {
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name='students/[studentId]'
+                name='student'
                 options={{ headerShown: false }}
             />
         </Stack>

@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, FlatList, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { config } from '@/config';
 
 interface Student {
-    id: string;
+    _id: string;
     name: string;
     email: string;
     class: 'JSS 1' | 'JSS 2' | 'JSS 3' | 'SSS 1' | 'SSS 2' | 'SSS 3';
@@ -19,7 +20,7 @@ const StudentCard: React.FC<Student> = ({ name, class: studentClass, studentId }
     <TouchableOpacity
         className="bg-white p-4 rounded-xl shadow-sm mb-3 flex-row justify-between items-center"
         onPress={() => {
-            router.push(`../(screens)/students/[studentId]`);
+            router.push(`../(screens)/student`);
         }}
     >
         <View>
@@ -36,50 +37,58 @@ const StudentCard: React.FC<Student> = ({ name, class: studentClass, studentId }
 const Students = () => {
     const [showAddStudentForm, setShowAddStudentForm] = useState(false);
     const [newStudent, setNewStudent] = useState<Partial<Student>>({});
+    const [students, setStudents] = useState<Student[]>([]);
+    const [loading, setLoading] = useState(false);
 
-    const dummyStudents: Student[] = [
-        {
-            id: '1',
-            name: 'Sarah Johnson',
-            email: 'sarah@johnson.com',
-            class: 'JSS 2',
-            studentId: '2023/001',
-            age: 13,
-            gender: 'female',
-            guardianName: 'Mr. & Mrs. Johnson'
-        },
-        {
-            id: '2',
-            name: 'Michael Davis',
-            email: 'michael@davis.com',
-            class: 'SSS 1',
-            studentId: '2022/012',
-            age: 15,
-            gender: 'male',
-            guardianName: 'Mr. & Mrs. Davis'
-        },
-        {
-            id: '3',
-            name: 'Emily Williams',
-            email: 'emily@williams.com',
-            class: 'JSS 1',
-            studentId: '2023/045',
-            age: 12,
-            gender: 'female',
-            guardianName: 'Mrs. Williams'
-        }
-    ];
+    useEffect(() => {
+        const fetchStudents = async () => {
+            setLoading(true);
+            try {
+                const response = await fetch(`${config.BASE_API_URL}/api/students`);
+                const data = await response.json();
+                setStudents(data);
+            } catch (error) {
+                console.error('Error fetching students:', error);
+                Alert.alert('Error', 'Failed to fetch students');
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const handleAddStudent = () => {
-        if (!newStudent.name || !newStudent.class || !newStudent.studentId) {
-            alert('Please fill in all required fields');
+        fetchStudents();
+    }, []);
+
+    const handleAddStudent = async () => {
+        if (!newStudent.name || !newStudent.class || !newStudent.email) {
+            Alert.alert('Error', 'Please fill in all required fields');
             return;
         }
 
-        console.log('Adding new student:', newStudent);
-        setNewStudent({});
-        setShowAddStudentForm(false);
-    };
+        setLoading(true);
+        try {
+            const response = await fetch(`${config.BASE_API_URL}/api/students`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newStudent),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to add student');
+            }
+
+            const data = await response.json();
+            setStudents(prev => [...prev, data]);
+            setNewStudent({});
+            setShowAddStudentForm(false);
+            Alert.alert('Success', 'Student added successfully.');
+        } catch (error) {
+            console.error('Error adding student:', error);
+            Alert.alert('Error', 'Failed to add student');
+        }
+        setLoading(false);
+    }
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50">
@@ -149,8 +158,8 @@ const Students = () => {
                 )}
 
                 <FlatList
-                    data={dummyStudents}
-                    keyExtractor={(item) => item.id}
+                    data={students}
+                    keyExtractor={(item) => item._id}
                     renderItem={({ item }) => <StudentCard {...item} />}
                 />
 
@@ -158,6 +167,6 @@ const Students = () => {
             </ScrollView>
         </SafeAreaView>
     );
-};
+}
 
 export default Students;

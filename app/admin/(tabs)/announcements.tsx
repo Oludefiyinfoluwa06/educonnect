@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { config } from '@/config';
 
 interface Announcement {
-    id: string;
+    _id: string;
     title: string;
     content: string;
     date: string;
@@ -39,23 +39,45 @@ const Announcements = () => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium');
+    const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
-    const dummyAnnouncements: Announcement[] = [
-        {
-            id: '1',
-            title: 'School Closure Notice',
-            content: 'Due to maintenance work, the school will be closed on Friday, March 15th, 2024.',
-            date: 'March 10, 2024',
-            priority: 'high'
-        },
-        {
-            id: '2',
-            title: 'Parent-Teacher Meeting',
-            content: 'Annual parent-teacher meeting scheduled for March 20th, 2024. Time slots will be shared soon.',
-            date: 'March 8, 2024',
-            priority: 'medium'
+    useEffect(() => {
+        const fetchAnnouncements = async () => {
+            try {
+                const response = await fetch(`${config.BASE_API_URL}/api/announcement`);
+                const data = await response.json();
+                setAnnouncements(data);
+            } catch (error: any) {
+                console.log('Error fetching announcements:', error.response.data);
+            }
+        };
+
+        fetchAnnouncements();
+    }, []);
+
+    const handleCreateAnnouncement = async () => {
+        try {
+            const response = await fetch(`${config.BASE_API_URL}/announcements`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title,
+                    content,
+                    priority,
+                }),
+            });
+            const newAnnouncement = await response.json();
+            setAnnouncements([...announcements, newAnnouncement]);
+            setShowNewForm(false);
+            setTitle('');
+            setContent('');
+            setPriority('medium');
+        } catch (error: any) {
+            console.log('Error creating announcement:', error.response.data);
         }
-    ];
+    }
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50">
@@ -100,14 +122,17 @@ const Announcements = () => {
                                 </TouchableOpacity>
                             ))}
                         </View>
-                        <TouchableOpacity className="bg-blue-600 p-3 rounded-lg">
+                        <TouchableOpacity
+                            className="bg-blue-600 p-3 rounded-lg"
+                            onPress={handleCreateAnnouncement}
+                        >
                             <Text className="text-white font-rmedium text-center">Post Announcement</Text>
                         </TouchableOpacity>
                     </View>
                 )}
 
-                {dummyAnnouncements.map((announcement) => (
-                    <AnnouncementCard key={announcement.id} {...announcement} />
+                {announcements.map((announcement) => (
+                    <AnnouncementCard key={announcement._id} {...announcement} />
                 ))}
             </ScrollView>
         </SafeAreaView>
