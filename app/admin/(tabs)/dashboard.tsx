@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import axios from 'axios';
 import { config } from '@/config';
+import { getToken, logout } from '@/utils';
 
 interface StatCardProps {
     title: string;
@@ -47,6 +47,15 @@ interface ActivityItemProps {
     type: 'message' | 'payment' | 'academic';
 }
 
+interface Announcement {
+    _id: string;
+    title: string;
+    content: string;
+    date: string;
+    priority: 'high' | 'medium' | 'low';
+    createdAt: Date;
+}
+
 const ActivityItem: React.FC<ActivityItemProps> = ({ title, description, time, type }) => {
     const icons: Record<ActivityItemProps['type'], keyof typeof Ionicons.glyphMap> = {
         message: 'chatbubbles-outline',
@@ -63,7 +72,7 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ title, description, time, t
                 <Text className="text-gray-800 font-rsemibold">{title}</Text>
                 <Text className="text-gray-600 text-sm font-rregular">{description}</Text>
             </View>
-            <Text className="text-gray-500 text-sm font-rregular">{time}</Text>
+            <Text className="text-gray-500 text-sm font-rregular">{time === new Date().toLocaleDateString() ? 'Today' : time}</Text>
         </View>
     );
 }
@@ -72,16 +81,24 @@ const Dashboard = () => {
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
     const fetchDashboardStats = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${config.BASE_API_URL}api/dashboard/stats`);
+            const token = await getToken();
+            const response = await axios.get(`${config.BASE_API_URL}/api/dashboard/stats`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             setStats(response.data);
             setError(null);
-        } catch (err) {
-            console.error('Error fetching dashboard stats:', err);
-            setError('Failed to fetch dashboard statistics');
+        } catch (err: any) {
+            if (err.response.data.message === "Unauthorized") {
+                await logout();
+            }
+            setError(err.response.data.message);
         } finally {
             setLoading(false);
         }
@@ -92,6 +109,31 @@ const Dashboard = () => {
 
         const interval = setInterval(fetchDashboardStats, 300000);
         return () => clearInterval(interval);
+    }, []);
+
+    const fetchAnnouncements = async () => {
+        try {
+            const token = await getToken();
+            const response = await axios.get(`${config.BASE_API_URL}/api/announcement`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+            setAnnouncements(response.data);
+        } catch (error: any) {
+            if (error.response.data.message) {
+                if (error.response.data.message === "Unauthorized") {
+                    await logout();
+                }
+            }
+
+            Alert.alert('Error', error.response.data.error);
+        }
+    };
+
+    useEffect(() => {
+        fetchAnnouncements();
     }, []);
 
     const formatNumber = (num: number) => {
@@ -149,14 +191,17 @@ const Dashboard = () => {
                 </View>
 
                 <View className="mt-6 mb-6">
-                    <Text className="text-lg font-rbold text-gray-800 mb-3">Recent Activity</Text>
+                    <Text className="text-lg font-rbold text-gray-800 mb-3">Recent Announcements</Text>
                     <View className="bg-white rounded-xl shadow-sm p-4">
-                        <ActivityItem
-                            title="Fee Payment"
-                            description="₦150,000 received from John Doe"
-                            time="1h ago"
-                            type="payment"
-                        />
+                        {announcements.slice(0, 5).map((announcement) => (
+                            <ActivityItem
+                                key={announcement._id}
+                                title={announcement.title}
+                                description={announcement.content}
+                                time={new Date(announcement.createdAt).toLocaleDateString()}
+                                type="academic"
+                            />
+                        ))}
                     </View>
                 </View>
             </ScrollView>

@@ -19,7 +19,7 @@ const SignUp = () => {
         password: '',
         childName: '',
         studentId: '',
-        role: 'Parent',
+        role: isParent ? 'Parent' : 'Admin',
     });
     const router = useRouter();
 
@@ -93,10 +93,7 @@ const SignUp = () => {
                             className={`flex-1 h-12 rounded-xl items-center justify-center ${
                                 !isParent ? 'bg-blue-600' : 'bg-gray-100'
                             }`}
-                            onPress={() => {
-                                setIsParent(false);
-                                setFormData({ ...formData, role: 'Admin' });
-                            }}
+                            onPress={() => setIsParent(false)}
                         >
                             <Text className={`font-rsemibold ${
                                 !isParent ? 'text-white' : 'text-gray-600'
@@ -155,6 +152,15 @@ const SignUp = () => {
                                         autoCapitalize="words"
                                         value={formData.childName}
                                         onChangeText={(text) => handleInputChange('childName', text)}
+                                    />
+                                </View>
+                                <View>
+                                    <Text className="text-gray-700 mb-2 mt-3 text-sm font-rregular">Student ID</Text>
+                                    <TextInput
+                                        placeholder="Enter your child's Student ID"
+                                        className="w-full h-12 px-4 border border-gray-200 rounded-xl bg-gray-50 font-rregular"
+                                        value={formData.studentId}
+                                        onChangeText={(text) => handleInputChange('studentId', text)}
                                     />
                                 </View>
                             </>

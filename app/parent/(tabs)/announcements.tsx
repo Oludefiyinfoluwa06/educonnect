@@ -1,9 +1,12 @@
-import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { config } from '@/config';
+import { getToken, logout } from '@/utils';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface Announcement {
-    id: string;
+    _id: string;
     title: string;
     content: string;
     date: string;
@@ -28,35 +31,48 @@ const AnnouncementCard: React.FC<Announcement> = ({ title, content, date, priori
                 </View>
             </View>
             <Text className="text-gray-600 mb-2 font-rregular">{content}</Text>
-            <Text className="text-gray-500 text-sm font-rregular">{date}</Text>
+            <Text className="text-gray-500 text-sm font-rregular">Sent {date === new Date().toLocaleDateString() ? 'Today' : `on ${date}`}</Text>
         </View>
     );
 }
 
+const EmptyState = () => (
+    <View className="flex-1 justify-center items-center py-8">
+        <Ionicons name="megaphone-outline" size={64} color="#9CA3AF" />
+        <Text className="text-gray-500 font-rmedium text-lg mt-4">No announcements</Text>
+        <Text className="text-gray-400 font-rregular text-center mt-2">
+            Post announcements by clicking the 'New Announcement' button above
+        </Text>
+    </View>
+);
+
 const Announcements = () => {
-    const announcements: Announcement[] = [
-        {
-            id: '1',
-            title: 'School Closure Notice',
-            content: 'Due to maintenance work, the school will be closed on Friday, March 15th, 2024.',
-            date: 'March 10, 2024',
-            priority: 'high'
-        },
-        {
-            id: '2',
-            title: 'Parent-Teacher Meeting',
-            content: 'Annual parent-teacher meeting scheduled for March 20th, 2024. Time slots will be shared soon.',
-            date: 'March 8, 2024',
-            priority: 'medium'
-        },
-        {
-            id: '3',
-            title: 'Sports Day Preparation',
-            content: 'Annual sports day will be held on March 25th. Students should come in sports attire.',
-            date: 'March 7, 2024',
-            priority: 'low'
-        }
-    ];
+    const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+
+    useEffect(() => {
+        const fetchAnnouncements = async () => {
+            try {
+                const token = await getToken();
+                const response = await fetch(`${config.BASE_API_URL}/api/announcement`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
+                const data = await response.json();
+                setAnnouncements(data);
+            } catch (error: any) {
+                if (error.response.data.message) {
+                    if (error.response.data.message === "Unauthorized") {
+                        await logout();
+                    }
+                }
+
+                Alert.alert('Error', error.response.data.error);
+            }
+        };
+
+        fetchAnnouncements();
+    }, []);
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50">
@@ -66,9 +82,11 @@ const Announcements = () => {
                     <Text className="text-gray-600 font-rregular">Stay updated with school news</Text>
                 </View>
 
-                {announcements.map((announcement) => (
-                    <AnnouncementCard key={announcement.id} {...announcement} />
-                ))}
+                {announcements.length >= 1 ? announcements.map((announcement) => (
+                    <AnnouncementCard key={announcement._id} {...announcement} />
+                )) : (
+                    <EmptyState />
+                )}
             </ScrollView>
         </SafeAreaView>
     );

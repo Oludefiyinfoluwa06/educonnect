@@ -1,47 +1,125 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { getToken, logout } from '@/utils';
+import axios from 'axios';
+import { config } from '@/config';
 
-type FeeCardProps = {
+interface ActivityItemProps {
     title: string;
-    amount: number;
-    dueDate: string;
-    status: 'paid' | 'pending' | 'overdue';
+    description: string;
+    time: string;
+    type: 'message' | 'payment' | 'academic';
 }
 
-const FeeCard: React.FC<FeeCardProps> = ({ title, amount, dueDate, status }) => {
-    const statusColors = {
-        paid: 'bg-green-100 text-green-600',
-        pending: 'bg-yellow-100 text-yellow-600',
-        overdue: 'bg-red-100 text-red-600',
-    };
+interface Announcement {
+    _id: string;
+    title: string;
+    content: string;
+    date: string;
+    priority: 'high' | 'medium' | 'low';
+    createdAt: Date;
+}
+
+interface Student {
+    _id: string;
+    name: string;
+    email: string;
+    class: 'JSS 1' | 'JSS 2' | 'JSS 3' | 'SSS 1' | 'SSS 2' | 'SSS 3';
+    studentId: string;
+    age: number;
+    gender: 'male' | 'female';
+    guardianName: string;
+}
+
+const ActivityItem: React.FC<ActivityItemProps> = ({ title, description, time, type }) => {
+    const icons: Record<ActivityItemProps['type'], keyof typeof Ionicons.glyphMap> = {
+        message: 'chatbubbles-outline',
+        payment: 'wallet-outline',
+        academic: 'school-outline',
+    } as const;
 
     return (
-        <View className="bg-white p-4 rounded-xl shadow-sm mb-3">
-            <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-gray-800 font-rsemibold text-lg">{title}</Text>
-                <View className={`px-3 py-1 rounded-full ${statusColors[status].split(' ')[0]}`}>
-                    <Text className={`${statusColors[status].split(' ')[1]} font-rmedium capitalize`}>
-                        {status}
-                    </Text>
-                </View>
+        <View className="flex-row items-center py-3 border-b border-gray-100">
+            <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center">
+                <Ionicons name={icons[type]} size={20} color="#2563eb" />
             </View>
-            <Text className="text-2xl font-rbold text-blue-600">₦{amount.toLocaleString()}</Text>
-            <Text className="text-gray-500 mt-1 font-rregular">Due: {dueDate}</Text>
+            <View className="flex-1 ml-3">
+                <Text className="text-gray-800 font-rsemibold">{title}</Text>
+                <Text className="text-gray-600 text-sm font-rregular">{description}</Text>
+            </View>
+            <Text className="text-gray-500 text-sm font-rregular">{time === new Date().toLocaleDateString() ? 'Today' : time}</Text>
         </View>
     );
 }
 
 const Dashboard = () => {
+    const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+    const [student, setStudent] = useState<Student>();
+    const [loading, setLoading] = useState(false);
+
+    const fetchAnnouncements = async () => {
+        try {
+            const token = await getToken();
+            const response = await axios.get(`${config.BASE_API_URL}/api/announcement`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+            setAnnouncements(response.data);
+        } catch (error: any) {
+            if (error.response.data.message) {
+                if (error.response.data.message === "Unauthorized") {
+                    await logout();
+                }
+            }
+
+            Alert.alert('Error', error.response.data.error);
+        }
+    };
+
+    useEffect(() => {
+        fetchAnnouncements();
+    }, []);
+
+    useEffect(() => {
+        const fetchStudent = async () => {
+            setLoading(true);
+            try {
+                const token = await getToken();
+                const response = await axios.get(`${config.BASE_API_URL}/api/students`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
+
+                setStudent(response.data);
+            } catch (error: any) {
+                if (error.response.data.message) {
+                    if (error.response.data.message === "Unauthorized") {
+                        await logout();
+                    }
+                }
+
+                Alert.alert('Error', error.response.data.error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStudent();
+    }, []);
+
     return (
         <SafeAreaView className="flex-1 bg-gray-50">
             <ScrollView className="flex-1 px-4">
                 <View className="flex-row justify-between items-center py-4">
                     <View>
                         <Text className="text-gray-600 font-rregular">Welcome back,</Text>
-                        <Text className="text-xl font-rbold text-gray-800">John Doe</Text>
+                        <Text className="text-xl font-rbold text-gray-800">{loading ? '...' : student?.guardianName}</Text>
                     </View>
                     <TouchableOpacity className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center" onPress={() => router.push("./profile")}>
                         <Ionicons name="person-outline" size={20} color="#2563eb" />
@@ -69,20 +147,19 @@ const Dashboard = () => {
                     </TouchableOpacity>
                 </View>
 
-                <View className="mt-6 mb-[100px]">
-                    <Text className="text-lg font-bold text-gray-800 mb-3">Recent Fees</Text>
-                    <FeeCard
-                        title="First Term Fees"
-                        amount={150000}
-                        dueDate="March 15, 2024"
-                        status="pending"
-                    />
-                    <FeeCard
-                        title="Books and Materials"
-                        amount={25000}
-                        dueDate="February 28, 2024"
-                        status="paid"
-                    />
+                <View className="mt-6 mb-6">
+                    <Text className="text-lg font-rbold text-gray-800 mb-3">Recent Announcements</Text>
+                    <View className="bg-white rounded-xl shadow-sm p-4">
+                        {announcements.slice(0, 5).map((announcement) => (
+                            <ActivityItem
+                                key={announcement._id}
+                                title={announcement.title}
+                                description={announcement.content}
+                                time={new Date(announcement.createdAt).toLocaleDateString()}
+                                type="academic"
+                            />
+                        ))}
+                    </View>
                 </View>
             </ScrollView>
         </SafeAreaView>

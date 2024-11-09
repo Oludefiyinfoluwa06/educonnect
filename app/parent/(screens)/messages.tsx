@@ -1,57 +1,96 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import axios from 'axios';
+import { config } from '@/config';
+import { getToken, logout } from '@/utils';
+import { formatDistanceToNow, parseISO } from 'date-fns';
 
 interface Message {
-    id: string;
+    _id: string;
     content: string;
     timestamp: string;
 }
 
 const MessageBubble: React.FC<Message> = ({ content, timestamp }) => (
     <View className="bg-white p-3 rounded-xl shadow-sm mb-3 self-end">
-        <Text className="text-gray-800 font-rregular text-right">{content}</Text>
-        <Text className="text-gray-500 text-xs font-rregular text-right">{timestamp}</Text>
+        <Text className="text-gray-800 font-rregular text-lg text-right">{content}</Text>
+        <Text className="text-gray-500 text-xs font-rregular text-right">{formatDistanceToNow(parseISO(timestamp), { addSuffix: true })}</Text>
+    </View>
+);
+
+const EmptyState = () => (
+    <View className="flex-1 justify-center items-center py-8">
+        <Ionicons name="chatbox-ellipses-outline" size={64} color="#9CA3AF" />
+        <Text className="text-gray-500 font-rmedium text-lg mt-4">No messages</Text>
+        <Text className="text-gray-400 font-rregular text-center mt-2">
+            Make a contribution, ask for support or make a complaint through this feature. Messages will be sent to the school's email
+        </Text>
     </View>
 );
 
 const Messages = () => {
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            id: '1',
-            content: 'Hi, I have a question about the upcoming school event.',
-            timestamp: '3:45 PM',
-        },
-        {
-            id: '2',
-            content: 'Sure, how can I help you?',
-            timestamp: '3:47 PM',
-        },
-        {
-            id: '3',
-            content: 'What time does the event start?',
-            timestamp: '3:50 PM',
-        },
-        {
-            id: '4',
-            content: 'The event starts at 6 PM on Friday, March 22nd.',
-            timestamp: '3:52 PM',
-        },
-    ]);
-
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [loading, setLoading] = useState<Boolean>(false);
     const [newMessage, setNewMessage] = useState('');
 
-    const sendMessage = () => {
+    const fetchMessages = async () => {
+        try {
+            const token = await getToken();
+            const response = await axios.get(`${config.BASE_API_URL}/api/messages`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            setMessages(response.data.messages);
+        } catch (error: any) {
+            if (error.response.data.message) {
+                if (error.response.data.message === "Unauthorized") {
+                    await logout();
+                }
+            }
+
+            Alert.alert('Error', error.response.data.error);
+        }
+    }
+
+    useEffect(() => {
+        const getMessages = async () => {
+            await fetchMessages();
+        }
+
+        getMessages();
+    }, []);
+
+    const sendMessage = async () => {
         if (newMessage.trim() !== '') {
-            const newMessageObj: Message = {
-                id: `${messages.length + 1}`,
-                content: newMessage,
-                timestamp: new Date().toLocaleTimeString(),
-            };
-            setMessages([...messages, newMessageObj]);
-            setNewMessage('');
+            setLoading(true);
+            try {
+                const token = await getToken();
+                await axios.post(`${config.BASE_API_URL}/api/messages`, {
+                    content: newMessage
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                setNewMessage('');
+                fetchMessages();
+            } catch (error: any) {
+                if (error.response.data.message) {
+                    if (error.response.data.message === "Unauthorized") {
+                        await logout();
+                    }
+                }
+
+                Alert.alert('Error', error.response.data.error);
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
@@ -67,9 +106,11 @@ const Messages = () => {
             </View>
 
             <ScrollView className="flex-1 px-4 pt-4">
-                {messages.map((message) => (
-                    <MessageBubble key={message.id} {...message} />
-                ))}
+                {messages.length >= 1 ? messages.map((message) => (
+                    <MessageBubble key={message._id} {...message} />
+                )) : (
+                    <EmptyState />
+                )}
             </ScrollView>
 
             <View className="bg-white shadow-sm p-4 flex-row items-center">
@@ -84,7 +125,11 @@ const Messages = () => {
                     onPress={sendMessage}
                     disabled={newMessage.trim() === ''}
                 >
-                    <Ionicons name="send-outline" size={24} color="white" />
+                    {loading ? (
+                        <ActivityIndicator size="small" color="white" />
+                    ) : (
+                        <Ionicons name = "send-outline" size = { 24 } color = "white" />
+                    )}
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { config } from '@/config';
+import { getToken, logout } from '@/utils';
+import axios from 'axios';
 
 interface Student {
     _id: string;
@@ -19,18 +21,29 @@ interface Student {
 const StudentInformation = () => {
     const [student, setStudent] = useState<Student>();
     const [loading, setLoading] = useState(false);
-    const studentId = '';
+    const { studentId } = useLocalSearchParams();
 
     useEffect(() => {
         const fetchStudent = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`${config.BASE_API_URL}/api/students/${studentId}`);
-                const data = await response.json();
-                setStudent(data);
-            } catch (error) {
-                console.error('Error fetching students:', error);
-                Alert.alert('Error', 'Failed to fetch students');
+                const token = await getToken();
+                const response = await axios.get(`${config.BASE_API_URL}/api/students/${studentId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
+
+                setStudent(response.data);
+            } catch (error: any) {
+                if (error.response.data.message) {
+                    if (error.response.data.message === "Unauthorized") {
+                        await logout();
+                    }
+                }
+
+                console.log('Error fetching student:', error.response.data);
+                Alert.alert('Error', error.response.data.error);
             } finally {
                 setLoading(false);
             }
@@ -58,19 +71,19 @@ const StudentInformation = () => {
                 </View>
 
                 <View className="flex-row flex-wrap justify-between mb-4">
-                    <View className="bg-white p-3 rounded-xl shadow-sm w-[48%] mb-3">
+                    <View className="bg-white p-3 rounded-xl shadow-sm w-full mb-3">
                         <Text className="text-gray-600 font-rregular">Age</Text>
                         <Text className="text-lg font-rsemibold text-gray-800">{student?.age} years</Text>
                     </View>
-                    <View className="bg-white p-3 rounded-xl shadow-sm w-[48%] mb-3">
+                    <View className="bg-white p-3 rounded-xl shadow-sm w-full mb-3">
                         <Text className="text-gray-600 font-rregular">Gender</Text>
-                        <Text className="text-lg font-rsemibold text-gray-800">{student?.gender}</Text>
+                        <Text className="text-lg font-rsemibold text-gray-800 capitalize">{student?.gender}</Text>
                     </View>
-                    <View className="bg-white p-3 rounded-xl shadow-sm w-[48%] mb-3">
+                    <View className="bg-white p-3 rounded-xl shadow-sm w-full mb-3">
                         <Text className="text-gray-600 font-rregular">Parent/Guardian</Text>
                         <Text className="text-lg font-rsemibold text-gray-800">{student?.guardianName}</Text>
                     </View>
-                    <View className="bg-white p-3 rounded-xl shadow-sm w-[48%] mb-3">
+                    <View className="bg-white p-3 rounded-xl shadow-sm w-full mb-3">
                         <Text className="text-gray-600 font-rregular">Email</Text>
                         <Text className="text-lg font-rsemibold text-gray-800">{student?.email}</Text>
                     </View>
