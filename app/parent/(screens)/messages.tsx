@@ -33,7 +33,7 @@ const EmptyState = () => (
 
 const Messages = () => {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [loading, setLoading] = useState<Boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const [newMessage, setNewMessage] = useState('');
 
     const fetchMessages = async () => {
