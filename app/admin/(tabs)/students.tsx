@@ -152,9 +152,8 @@ const Students = () => {
                     <TextInput
                         className="border border-gray-200 rounded-lg p-3 mb-3 font-rregular"
                         placeholder="Department"
-                        value={(newStudent.class)?.toString()}
+                        value={(newStudent.class)}
                         onChangeText={(text) => setNewStudent(prev => ({ ...prev, class: text }))}
-                        keyboardType='number-pad'
                     />
                     <View className="border border-gray-200 rounded-lg mb-3 font-rregular">
                         <Picker

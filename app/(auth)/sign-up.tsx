@@ -39,7 +39,7 @@ const SignUp = () => {
             await AsyncStorage.setItem('role', response.data.user.role);
             router.replace(isParent ? "../parent/(tabs)/dashboard" : "../admin/(tabs)/dashboard");
         } catch (error: any) {
-            setErrorMessage(error.response.data.message);
+            setErrorMessage(error.response?.data?.message);
 
             setTimeout(() => setErrorMessage(''), 3000);
         } finally {
@@ -98,7 +98,7 @@ const SignUp = () => {
                             }`}
                             onPress={() => {
                                 setIsParent(false);
-                                setFormData({ ...formData, role: 'Parent' });
+                                setFormData({ ...formData, role: 'Admin' });
                             }}
                         >
                             <Text className={`font-rsemibold ${

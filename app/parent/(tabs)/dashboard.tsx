@@ -27,7 +27,6 @@ interface Student {
     _id: string;
     name: string;
     email: string;
-    class: string;
     studentId: string;
     age: number;
     gender: 'male' | 'female';
@@ -77,7 +76,7 @@ const Dashboard = () => {
                 }
             }
 
-            Alert.alert('Error', error.response.data.error);
+            Alert.alert('Error', error.response?.data?.error);
         }
     };
 

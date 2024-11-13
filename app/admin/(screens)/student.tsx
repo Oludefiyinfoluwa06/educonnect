@@ -42,7 +42,6 @@ const StudentInformation = () => {
                     }
                 }
 
-                console.log('Error fetching student:', error.response.data);
                 Alert.alert('Error', error.response.data.error);
             } finally {
                 setLoading(false);

@@ -97,7 +97,6 @@ const Announcements = () => {
             setPriority('medium');
             fetchAnnouncements();
         } catch (error: any) {
-            console.log(error.response.data);
             if (error.response.data.message) {
                 if (error.response.data.message === "Unauthorized") {
                     await logout();
