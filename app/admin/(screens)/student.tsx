@@ -11,7 +11,7 @@ interface Student {
     _id: string;
     name: string;
     email: string;
-    class: 'JSS 1' | 'JSS 2' | 'JSS 3' | 'SSS 1' | 'SSS 2' | 'SSS 3';
+    class: string;
     studentId: string;
     age: number;
     gender: 'male' | 'female';

@@ -107,7 +107,7 @@ const Dashboard = () => {
     useEffect(() => {
         fetchDashboardStats();
 
-        const interval = setInterval(fetchDashboardStats, 300000);
+        const interval = setInterval(fetchDashboardStats, 30000);
         return () => clearInterval(interval);
     }, []);
 

@@ -12,7 +12,7 @@ interface Student {
     _id: string;
     name: string;
     email: string;
-    class: 'JSS 1' | 'JSS 2' | 'JSS 3' | 'SSS 1' | 'SSS 2' | 'SSS 3';
+    class: string;
     studentId: string;
     age: number;
     gender: 'male' | 'female';
@@ -149,25 +149,13 @@ const Students = () => {
                         onChangeText={(text) => setNewStudent(prev => ({ ...prev, age: parseInt(text) }))}
                         keyboardType='number-pad'
                     />
-                    <View className="border border-gray-200 rounded-lg mb-3 font-rregular">
-                        <Picker
-                            selectedValue={newStudent.class}
-                            onValueChange={(itemValue: 'JSS 1' | 'JSS 2' | 'JSS 3' | 'SSS 1' | 'SSS 2' | 'SSS 3') =>
-                                setNewStudent({
-                                    ...newStudent,
-                                    class: itemValue as 'JSS 1' | 'JSS 2' | 'JSS 3' | 'SSS 1' | 'SSS 2' | 'SSS 3',
-                                })
-                            }
-                        >
-                            <Picker.Item label="Class" value="" />
-                            <Picker.Item label="JSS 1" value="JSS 1" />
-                            <Picker.Item label="JSS 2" value="JSS 2" />
-                            <Picker.Item label="JSS 3" value="JSS 3" />
-                            <Picker.Item label="SSS 1" value="SSS 1" />
-                            <Picker.Item label="SSS 2" value="SSS 2" />
-                            <Picker.Item label="SSS 3" value="SSS 3" />
-                        </Picker>
-                    </View>
+                    <TextInput
+                        className="border border-gray-200 rounded-lg p-3 mb-3 font-rregular"
+                        placeholder="Department"
+                        value={(newStudent.class)?.toString()}
+                        onChangeText={(text) => setNewStudent(prev => ({ ...prev, class: text }))}
+                        keyboardType='number-pad'
+                    />
                     <View className="border border-gray-200 rounded-lg mb-3 font-rregular">
                         <Picker
                             selectedValue={newStudent.gender}

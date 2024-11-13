@@ -36,13 +36,13 @@ const SplashScreen = () => {
                         className="px-4 py-2 rounded-lg"
                     >
                         <Text className="text-4xl font-rextrabold text-white tracking-wide">
-                            EduConnect
+                            Wincoln
                         </Text>
                     </LinearGradient>
                     <View className="flex-row items-center justify-center mt-2">
                         <View className="h-[1px] w-12 bg-blue-600/20" />
                         <Text className="text-blue-600 text-xs mx-2 font-rbold">
-                            LEARNING SIMPLIFIED
+                            BRIDGE
                         </Text>
                         <View className="h-[1px] w-12 bg-blue-600/20" />
                     </View>

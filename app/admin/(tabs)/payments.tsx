@@ -9,22 +9,15 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface SchoolFee {
     _id: string;
-    className: string;
     amount: number;
     dueDate: string;
-    term: string;
     description: string;
 }
-
-const CLASSES = [
-    'JSS 1', 'JSS 2', 'JSS 3',
-    'SSS 1', 'SSS 2', 'SSS 3'
-];
 
 const TERMS = ['First Term', 'Second Term', 'Third Term'];
 
 const SchoolFeeCard: React.FC<SchoolFee & { onEdit: (fee: SchoolFee) => void }> = ({
-    _id, className, amount, dueDate, term, description, onEdit
+    _id, amount, dueDate, description, onEdit
 }) => {
     const formattedDate = new Date(dueDate).toLocaleDateString();
     const isOverdue = new Date(dueDate) < new Date();
@@ -32,10 +25,9 @@ const SchoolFeeCard: React.FC<SchoolFee & { onEdit: (fee: SchoolFee) => void }> 
     return (
         <View className="bg-white p-4 rounded-xl shadow-sm mb-3">
             <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-gray-800 font-rsemibold text-lg">{className}</Text>
                 <View className="flex-row items-center">
                     <TouchableOpacity
-                        onPress={() => onEdit({ _id, className, amount, dueDate, term, description })}
+                        onPress={() => onEdit({ _id, amount, dueDate, description })}
                         className="mr-2"
                     >
                         <Ionicons name="pencil" size={20} color="#4B5563" />
@@ -51,7 +43,6 @@ const SchoolFeeCard: React.FC<SchoolFee & { onEdit: (fee: SchoolFee) => void }> 
             <Text className="text-gray-600 mb-2 font-rregular">{description}</Text>
             <View className="flex-row justify-between items-center">
                 <Text className="text-gray-500 text-sm font-rregular">Due: {formattedDate}</Text>
-                <Text className="text-gray-500 text-sm font-rmedium">{term}</Text>
             </View>
         </View>
     );
@@ -71,27 +62,19 @@ const SchoolFees = () => {
     const [showForm, setShowForm] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [editingClass, setEditingClass] = useState('');
-    const [editingTerm, setEditingTerm] = useState('');
-    const [className, setClassName] = useState(CLASSES[0]);
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
-    const [term, setTerm] = useState(TERMS[0]);
     const [dueDate, setDueDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [schoolFees, setSchoolFees] = useState<SchoolFee[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
     const resetForm = () => {
-        setClassName(CLASSES[0]);
         setAmount('');
         setDescription('');
-        setTerm(TERMS[0]);
         setDueDate(new Date());
         setIsEditing(false);
         setEditingId(null);
-        setEditingClass('');
-        setEditingTerm('');
         setShowForm(false);
     };
 
@@ -125,8 +108,6 @@ const SchoolFees = () => {
     const handleEdit = (fee: SchoolFee) => {
         setIsEditing(true);
         setEditingId(fee._id);
-        setEditingClass(fee.className);
-        setEditingTerm(fee.term);
         setAmount(fee.amount.toString());
         setDescription(fee.description);
         setDueDate(new Date(fee.dueDate));
@@ -182,10 +163,8 @@ const SchoolFees = () => {
         try {
             const token = await getToken();
             await axios.post(`${config.BASE_API_URL}/api/school-fees`, {
-                className,
                 amount: Number(amount),
                 dueDate: dueDate.toISOString(),
-                term,
                 description
             }, {
                 headers: {
@@ -230,7 +209,7 @@ const SchoolFees = () => {
                             <>
                                 <View className="mb-4">
                                     <Text className="text-lg font-rsemibold text-gray-800 mb-2">
-                                        Editing fee for {editingClass} - {editingTerm}
+                                        Editing fee
                                     </Text>
                                 </View>
 
@@ -260,20 +239,6 @@ const SchoolFees = () => {
                             </>
                         ) : (
                             <>
-                                <View className="flex-row flex-wrap mb-3">
-                                    {CLASSES.map((cls) => (
-                                        <TouchableOpacity
-                                            key={cls}
-                                            className={`mr-2 mb-2 px-4 py-2 rounded-full ${className === cls ? 'bg-blue-600' : 'bg-gray-200'}`}
-                                            onPress={() => setClassName(cls)}
-                                        >
-                                            <Text className={`font-rmedium ${className === cls ? 'text-white' : 'text-gray-600'}`}>
-                                                {cls}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-
                                 <TextInput
                                     className="border border-gray-200 rounded-lg p-2 mb-3 font-rregular"
                                     placeholder="Amount (₦)"
@@ -284,24 +249,10 @@ const SchoolFees = () => {
 
                                 <TextInput
                                     className="border border-gray-200 rounded-lg p-2 mb-3 font-rregular"
-                                    placeholder="Description (e.g. First Term Fees 2024/2025)"
+                                    placeholder="Description"
                                     value={description}
                                     onChangeText={setDescription}
                                 />
-
-                                <View className="flex-row flex-wrap mb-3">
-                                    {TERMS.map((t) => (
-                                        <TouchableOpacity
-                                            key={t}
-                                            className={`mr-2 mb-2 px-4 py-2 rounded-full ${term === t ? 'bg-blue-600' : 'bg-gray-200'}`}
-                                            onPress={() => setTerm(t)}
-                                        >
-                                            <Text className={`font-rmedium ${term === t ? 'text-white' : 'text-gray-600'}`}>
-                                                {t}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
 
                                 <TouchableOpacity
                                     className="border border-gray-200 rounded-lg p-2 mb-3"

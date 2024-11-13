@@ -63,7 +63,7 @@ const EmptyState = () => (
 const ParentPayments = () => {
     const [schoolFees, setSchoolFees] = useState<SchoolFee[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const [userDetails, setUserDetails] = useState<any>(null);
+    const [userDetails, setUserDetails] = useState<any>();
 
     const fetchUserDetails = async () => {
         try {
@@ -86,7 +86,7 @@ const ParentPayments = () => {
         setLoading(true);
         try {
             const token = await getToken();
-            const response = await axios.get(`${config.BASE_API_URL}/api/school-fees/child`, {
+            const response = await axios.get(`${config.BASE_API_URL}/api/school-fees`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -107,7 +107,7 @@ const ParentPayments = () => {
         fetchSchoolFees();
     }, []);
 
-    const verifyPayment = async (transactionId: string, transactionRef: string, feeId: string) => {
+    const verifyPayment = async (transactionId: string, feeId: string) => {
         try {
             const token = await getToken();
             const response = await axios.get(
@@ -152,7 +152,7 @@ const ParentPayments = () => {
                     tx_ref: txRef,
                     amount: fee.amount,
                     currency: 'NGN',
-                    redirect_url: 'redirect-url',
+                    redirect_url: 'your-redirect-url',
                     payment_options: 'card,ussd',
                     customer: {
                         email: userDetails.email,
@@ -174,11 +174,25 @@ const ParentPayments = () => {
 
             if (response.data.data.link) {
                 await Linking.openURL(response.data.data.link);
-
-                if (response.data.data.transaction_id) {
-                    await verifyPayment(response.data.data.transaction_id, txRef, fee._id);
-                }
             }
+
+            const checkPaymentInterval = setInterval(async () => {
+                try {
+                    const verifyResponse = await axios.get(`https://api.flutterwave.com/v3/transactions/${txRef}/verify`, {
+                        headers: {
+                            Authorization: `Bearer ${FLUTTERWAVE_SECRET_KEY}`,
+                        },
+                    });
+
+                    if (verifyResponse.data.data.status === 'successful') {
+                        clearInterval(checkPaymentInterval);
+                        await verifyPayment(verifyResponse.data.data.id, fee._id);
+                    }
+                } catch {
+                    clearInterval(checkPaymentInterval);
+                }
+            }, 5000);
+
         } catch (error: any) {
             console.log(error.response.data);
             Alert.alert('Error', error.response?.data?.error || 'Failed to initiate payment');

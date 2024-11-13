@@ -19,7 +19,7 @@ const SignUp = () => {
         password: '',
         childName: '',
         studentId: '',
-        role: isParent ? 'Parent' : 'Admin',
+        role: 'Parent',
     });
     const router = useRouter();
 
@@ -64,13 +64,13 @@ const SignUp = () => {
                                 className="px-4 py-2 rounded-lg"
                             >
                                 <Text className="text-4xl font-rextrabold text-white tracking-wide">
-                                    EduConnect
+                                    Wincoln
                                 </Text>
                             </LinearGradient>
                             <View className="flex-row items-center justify-center mt-2">
                                 <View className="h-[1px] w-12 bg-blue-600/20" />
                                 <Text className="text-blue-600 text-xs mx-2 font-rbold">
-                                    LEARNING SIMPLIFIED
+                                    BRIDGE
                                 </Text>
                                 <View className="h-[1px] w-12 bg-blue-600/20" />
                             </View>
@@ -83,7 +83,10 @@ const SignUp = () => {
                             className={`flex-1 h-12 rounded-xl items-center justify-center ${
                                 isParent ? 'bg-blue-600' : 'bg-gray-100'
                             }`}
-                            onPress={() => setIsParent(true)}
+                            onPress={() => {
+                                setIsParent(true);
+                                setFormData({ ...formData, role: 'Parent' });
+                            }}
                         >
                             <Text className={`font-rsemibold ${
                                 isParent ? 'text-white' : 'text-gray-600'
@@ -91,12 +94,15 @@ const SignUp = () => {
                         </TouchableOpacity>
                         <TouchableOpacity
                             className={`flex-1 h-12 rounded-xl items-center justify-center ${
-                                !isParent ? 'bg-blue-600' : 'bg-gray-100'
+                                isParent? 'bg-gray-100' : 'bg-blue-600'
                             }`}
-                            onPress={() => setIsParent(false)}
+                            onPress={() => {
+                                setIsParent(false);
+                                setFormData({ ...formData, role: 'Parent' });
+                            }}
                         >
                             <Text className={`font-rsemibold ${
-                                !isParent ? 'text-white' : 'text-gray-600'
+                                isParent ? 'text-gray-600' : 'text-white'
                             }`}>Admin</Text>
                         </TouchableOpacity>
                     </View>
