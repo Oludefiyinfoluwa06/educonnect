@@ -1,19 +1,21 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
+import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { useFonts } from 'expo-font';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+const RootLayout = () => {
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    "Raleway-Black": require("../assets/fonts/Raleway-Black.ttf"),
+    "Raleway-Bold": require("../assets/fonts/Raleway-Bold.ttf"),
+    "Raleway-ExtraBold": require("../assets/fonts/Raleway-ExtraBold.ttf"),
+    "Raleway-ExtraLight": require("../assets/fonts/Raleway-ExtraLight.ttf"),
+    "Raleway-Light": require("../assets/fonts/Raleway-Light.ttf"),
+    "Raleway-Medium": require("../assets/fonts/Raleway-Medium.ttf"),
+    "Raleway-Regular": require("../assets/fonts/Raleway-Regular.ttf"),
+    "Raleway-SemiBold": require("../assets/fonts/Raleway-SemiBold.ttf"),
+    "Raleway-Thin": require("../assets/fonts/Raleway-Thin.ttf"),
   });
 
   useEffect(() => {
@@ -27,11 +29,29 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
+    <Stack>
+      <Stack.Screen
+        name='index'
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name='+not-found'
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name='(auth)'
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name='admin'
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name='parent'
+        options={{ headerShown: false }}
+      />
+    </Stack>
   );
 }
+
+export default RootLayout;
